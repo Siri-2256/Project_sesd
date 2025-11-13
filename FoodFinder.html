@@ -1,0 +1,574 @@
+# Project_sesd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodFinder - Find Your Favorite Dish</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Load Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-brand-red { background-color: #E23744; }
+        .text-brand-red { color: #E23744; }
+        .hover\:bg-brand-red-dark:hover { background-color: #CB202D; }
+        .ring-brand-red { --tw-ring-color: #E23744; }
+        .border-brand-red { border-color: #E23744; }
+        .text-brand-green { color: #16A34A; }
+        .bg-brand-green { background-color: #16A34A; }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        input[type="text"] {
+            font-size: 16px;
+        }
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- App Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <h1 class="text-2xl font-bold text-brand-red cursor-pointer" id="logo-btn">FoodFinder</h1>
+                </div>
+                <!-- Desktop Nav -->
+                <div class="hidden sm:flex sm:items-center sm:space-x-8">
+                    <a href="#" class="nav-link text-base font-medium text-gray-900 border-b-2 border-brand-red pb-1" data-page="searchPage">Home</a>
+                    <a href="#" class="nav-link text-base font-medium text-gray-600 hover:text-gray-900 relative" data-page="favoritesPage">
+                        Favorites
+                        <span id="favorites-badge-desktop" class="absolute -top-2 -right-4 bg-brand-red text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+                </div>
+                <!-- Mobile Nav Toggle (Heart icon) -->
+                <div class="sm:hidden flex items-center space-x-4">
+                    <a href="#" class="nav-link text-gray-600 hover:text-gray-900 relative" data-page="favoritesPage">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                        <span id="favorites-badge-mobile" class="absolute -top-2 -right-3 bg-brand-red text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- PAGE 1: Landing / Search -->
+        <div id="searchPage" class="page active">
+            <div class="max-w-2xl mx-auto text-center">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-8 sm:mt-12">
+                    Find your next favorite dish.
+                </h2>
+                <!-- Search Bar & Recommendations -->
+                <div class="mt-8 relative">
+                    <form id="search-form" class="flex items-center bg-white p-2 rounded-lg shadow-lg border border-gray-200">
+                        <svg class="w-5 h-5 text-gray-400 mx-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="search-input" class="flex-grow p-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none" placeholder="Search by city, cuisine, or dish..." autocomplete="off">
+                        <button type="submit" class="bg-brand-red text-white font-medium py-2.5 px-5 rounded-lg hover:bg-brand-red-dark focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2">
+                            Search
+                        </button>
+                    </form>
+                    <!-- Search Recommendations Dropdown -->
+                    <div id="search-recommendations" class="hidden absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-40 text-left">
+                        <!-- Recommendations will be injected here by JS -->
+                    </div>
+                </div>
+                <!-- Quick Suggestions -->
+                <div class="mt-8">
+                    <span class="text-sm font-medium text-gray-600 mr-3">Popular:</span>
+                    <div id="quick-search-chips" class="inline-flex flex-wrap justify-center gap-2">
+                        <button class="quick-search-btn bg-gray-100 text-gray-600 font-medium py-1.5 px-3 rounded-full hover:bg-gray-200 text-sm">Hanamkonda</button>
+                        <button class="quick-search-btn bg-gray-100 text-gray-600 font-medium py-1.5 px-3 rounded-full hover:bg-gray-200 text-sm">Nakkalagutta</button>
+                        <button class="quick-search-btn bg-gray-100 text-gray-600 font-medium py-1.5 px-3 rounded-full hover:bg-gray-200 text-sm">Mandi</button>
+                        <button class="quick-search-btn bg-gray-100 text-gray-600 font-medium py-1.5 px-3 rounded-full hover:bg-gray-200 text-sm">Shawarma</button>
+                        <button class="quick-search-btn bg-gray-100 text-gray-600 font-medium py-1.5 px-3 rounded-full hover:bg-gray-200 text-sm">Pizza</button>
+                        <button class="quick-search-btn bg-gray-100 text-gray-600 font-medium py-1.5 px-3 rounded-full hover:bg-gray-200 text-sm">Ice Cream</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: Search Results / Restaurant List -->
+        <div id="resultsPage" class="page">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6" id="results-title">
+                Showing results
+            </h2>
+            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Restaurant cards injected by JS -->
+            </div>
+            <div id="empty-results" class="hidden text-center max-w-lg mx-auto py-16">
+                <svg class="w-24 h-24 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h18M11 11v8m2-8v8M5 3v18h14V3M5 7h14M5 11h14M5 15h14" /></svg>
+                <h2 class="text-2xl font-bold text-gray-900 mt-4 mb-2">
+                    No restaurants found.
+                </h2>
+                <p class="text-base text-gray-600 mb-6">
+                    We couldn't find any matches for your search. Try a different city or cuisine.
+                </p>
+                <button id="retry-search-btn" class="bg-brand-red text-white font-medium py-2.5 px-5 rounded-lg hover:bg-brand-red-dark focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2">
+                    Try Another Search
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE 3: Restaurant Detail / Menu -->
+        <div id="menuPage" class="page">
+            <div class="max-w-4xl mx-auto">
+                <div>
+                    <img id="menu-hero-image" class="h-48 sm:h-64 md:h-80 w-full object-cover rounded-xl shadow-lg" src="" alt="Restaurant hero image">
+                </div>
+                <div class="bg-white shadow-md rounded-xl p-6 -mt-16 relative z-10 max-w-3xl mx-auto">
+                    <h2 id="menu-restaurant-name" class="text-3xl font-bold text-gray-900"></h2>
+                    <p id="menu-restaurant-cuisines" class="text-base text-gray-600 mt-1"></p>
+                    <p id="menu-restaurant-location" class="text-sm text-gray-500 mt-2"></p>
+                    <div id="menu-restaurant-rating" class="bg-brand-green text-white text-base font-bold rounded-md px-3 py-1 flex items-center w-fit mt-3">
+                        <!-- Rating injected by JS -->
+                    </div>
+                </div>
+                <div class="mt-10">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Menu</h3>
+                    <div id="menu-items-container" class="space-y-6">
+                        <!-- Menu items injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: Favorites Page -->
+        <div id="favoritesPage" class="page">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">
+                    Your Favorite Dishes
+                </h2>
+                <span id="favorites-count-header" class="text-lg font-medium text-gray-600">0 items</span>
+            </div>
+            <div id="favorites-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="empty-favorites" class="hidden text-center max-w-lg mx-auto py-16">
+                <svg class="w-24 h-24 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                <h2 class="text-2xl font-bold text-gray-900 mt-4 mb-2">
+                    No favorites yet.
+                </h2>
+                <p class="text-base text-gray-600 mb-6">
+                    Click the <span class="text-brand-red font-semibold">heart icon</span> on any dish to save it here.
+                </p>
+                <button id="find-restaurants-btn" class="bg-brand-red text-white font-medium py-2.5 px-5 rounded-lg hover:bg-brand-red-dark focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2">
+                    Find Restaurants
+                </button>
+            </div>
+        </div>
+
+    </main>
+    <div id="toast" class="fixed bottom-10 right-10 bg-gray-900 text-white py-2 px-5 rounded-full shadow-lg opacity-0 transform translate-y-5 transition-all duration-300"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // 1. DATA -- with your requested images
+            const restaurantsData = [
+                {
+                    id: 1,
+                    name: "Cream Stone",
+                    location: "Subedari, Hanamkonda",
+                    cuisines: "Ice Creams, Desserts, Shakes",
+                    rating: "4.3",
+                    image: "https://www.keep-calm-and-eat-ice-cream.com/wp-content/uploads/2020/10/Chocolate-sundae-square.png",
+                    menu: [
+                        {
+                            name: "Chocolate Sundae",
+                            image: "https://www.keep-calm-and-eat-ice-cream.com/wp-content/uploads/2020/10/Chocolate-sundae-square.png",
+                            price: 220.00,
+                            desc: "A rich chocolate sundae with brownie, fudge, and nuts.",
+                            rating: "4.6"
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "Al Baik Shawarma",
+                    location: "Naimnagar, Hanamkonda",
+                    cuisines: "Shawarma, Lebanese, Arabian",
+                    rating: "4.5",
+                    image: "https://fishandmeat.hk/wp-content/uploads/2025/05/arabic-chicken-shawarma-sandwich-recipe-1747792750.jpg",
+                    menu: [
+                        {
+                            name: "Chicken Shawarma Roll",
+                            image: "https://fishandmeat.hk/wp-content/uploads/2025/05/arabic-chicken-shawarma-sandwich-recipe-1747792750.jpg",
+                            price: 130.00,
+                            desc: "Juicy chicken shawarma with garlic sauce and pickles in a wrap.",
+                            rating: "4.7"
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "Domino's Pizza",
+                    location: "Nakkalagutta, Hanamkonda",
+                    cuisines: "Pizzas, Italian, Fast Food",
+                    rating: "4.0",
+                    image: "https://assets.surlatable.com/m/15a89c2d9c6c1345/72_dpi_webp-REC-283110_Pizza.jpg",
+                    menu: [
+                        {
+                            name: "Pepperoni Pizza",
+                            image: "https://assets.surlatable.com/m/15a89c2d9c6c1345/72_dpi_webp-REC-283110_Pizza.jpg",
+                            price: 450.00,
+                            desc: "Classic pepperoni pizza with mozzarella cheese and a zesty tomato sauce.",
+                            rating: "4.5"
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: "Arabian Mandi House",
+                    location: "Ramnagar, Hanamkonda",
+                    cuisines: "Mandi, Arabian, Middle Eastern",
+                    rating: "4.2",
+                    image: "https://biryaaniwala.com/wp-content/uploads/2024/07/Mandi-Biryani-Franchise.jpg",
+                    menu: [
+                        {
+                            name: "Chicken Mandi Platter",
+                            image: "https://biryaaniwala.com/wp-content/uploads/2024/07/Mandi-Biryani-Franchise.jpg",
+                            price: 750.00,
+                            desc: "Arabian mandi platter with long-grain rice and tender grilled chicken.",
+                            rating: "4.8"
+                        }
+                    ]
+                }
+            ];
+
+            const allCuisines = [...new Set(restaurantsData.flatMap(r => r.cuisines.split(', ').map(c => c.trim())))];
+            const allLocations = [...new Set(restaurantsData.map(r => r.location))];
+            const allDishNames = [...new Set(restaurantsData.flatMap(r => r.menu.map(m => m.name)))];
+            const allRestaurantNames = restaurantsData.map(r => r.name);
+
+            let favorites = [];
+            const FAVORITES_KEY = 'foodfinder_favorites_v1';
+
+            const pages = {
+                searchPage: document.getElementById('searchPage'),
+                resultsPage: document.getElementById('resultsPage'),
+                menuPage: document.getElementById('menuPage'),
+                favoritesPage: document.getElementById('favoritesPage')
+            };
+            const navLinks = document.querySelectorAll('.nav-link');
+            const searchInput = document.getElementById('search-input');
+            const searchForm = document.getElementById('search-form');
+            const searchRecommendations = document.getElementById('search-recommendations');
+
+            function navigateTo(pageName) {
+                Object.values(pages).forEach(page => page.classList.remove('active'));
+                if (pages[pageName]) {
+                    pages[pageName].classList.add('active');
+                } else {
+                    pages.searchPage.classList.add('active');
+                }
+                navLinks.forEach(link => {
+                    if (link.dataset.page === pageName) {
+                        link.classList.add('text-gray-900', 'border-brand-red');
+                        link.classList.remove('text-gray-600');
+                    } else {
+                        link.classList.remove('text-gray-900', 'border-brand-red');
+                        link.classList.add('text-gray-600');
+                    }
+                });
+                window.scrollTo(0, 0);
+                if (pageName === 'favoritesPage') {
+                    renderFavoritesPage();
+                }
+            }
+
+            function showSearchPage() { navigateTo('searchPage'); }
+            function showResultsPage(query) {
+                renderRestaurantResults(query);
+                navigateTo('resultsPage');
+            }
+            function showMenuPage(restaurantId) {
+                renderMenuPage(restaurantId);
+                navigateTo('menuPage');
+            }
+            function showFavoritesPage() {
+                renderFavoritesPage();
+                navigateTo('favoritesPage');
+            }
+
+            function renderRestaurantResults(query) {
+                const resultsGrid = document.getElementById('results-grid');
+                const emptyResults = document.getElementById('empty-results');
+                const resultsTitle = document.getElementById('results-title');
+                const lowerQuery = query.toLowerCase();
+                const filteredRestaurants = restaurantsData.filter(r =>
+                    r.name.toLowerCase().includes(lowerQuery) ||
+                    r.location.toLowerCase().includes(lowerQuery) ||
+                    r.cuisines.toLowerCase().includes(lowerQuery) ||
+                    r.menu.some(m => m.name.toLowerCase().includes(lowerQuery))
+                );
+                resultsGrid.innerHTML = '';
+                if (filteredRestaurants.length === 0) {
+                    resultsTitle.textContent = `No results for "${query}"`;
+                    emptyResults.classList.remove('hidden');
+                    resultsGrid.classList.add('hidden');
+                } else {
+                    resultsTitle.textContent = `Showing results for "${query}"`;
+                    emptyResults.classList.add('hidden');
+                    resultsGrid.classList.remove('hidden');
+                    filteredRestaurants.forEach(restaurant => {
+                        resultsGrid.innerHTML += `
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg flex flex-col">
+                                <img class="h-48 w-full object-cover" src="${restaurant.image}" alt="${restaurant.name}">
+                                <div class="p-4 space-y-3 flex-grow flex flex-col">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="text-lg font-semibold text-gray-900">${restaurant.name}</h3>
+                                        <div class="bg-brand-green text-white text-sm font-bold rounded-md px-2 py-0.5 flex items-center flex-shrink-0">
+                                            ${restaurant.rating} <svg class="w-3 h-3 ml-1 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 7.09l6.572-.955L10 0l2.939 6.135 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">${restaurant.cuisines}</p>
+                                    <p class="text-sm text-gray-600">${restaurant.location}</p>
+                                    <div class="flex-grow"></div>
+                                    <button class="view-menu-btn w-full bg-brand-red text-white font-medium py-2.5 px-5 rounded-lg hover:bg-brand-red-dark focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 mt-2"
+                                            data-restaurant-id="${restaurant.id}">
+                                        View Menu
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+            function renderMenuPage(restaurantId) {
+                const restaurant = restaurantsData.find(r => r.id === parseInt(restaurantId));
+                if (!restaurant) return;
+                document.getElementById('menu-hero-image').src = restaurant.image;
+                document.getElementById('menu-hero-image').alt = restaurant.name;
+                document.getElementById('menu-restaurant-name').textContent = restaurant.name;
+                document.getElementById('menu-restaurant-cuisines').textContent = restaurant.cuisines;
+                document.getElementById('menu-restaurant-location').textContent = restaurant.location;
+                const ratingEl = document.getElementById('menu-restaurant-rating');
+                ratingEl.innerHTML =
+                    `${restaurant.rating} <svg class="w-4 h-4 ml-1.5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 7.09l6.572-.955L10 0l2.939 6.135 6.572.955-4.756 4.635 1.123 6.545z"/></svg>`;
+                const menuItemsContainer = document.getElementById('menu-items-container');
+                menuItemsContainer.innerHTML = '';
+                restaurant.menu.forEach(item => {
+                    const isFavorited = favorites.some(fav => fav.name === item.name && fav.restaurantName === restaurant.name);
+                    menuItemsContainer.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-md flex items-center space-x-4">
+                        <img class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover" src="${item.image}" alt="${item.name}">
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center mb-1">
+                                <h3 class="text-lg font-semibold text-gray-900">${item.name}</h3>
+                                ${item.rating ? `
+                                <div class="bg-brand-green text-white text-xs font-bold rounded-md px-2 py-0.5 flex items-center flex-shrink-0 ml-2">
+                                    ${item.rating} <svg class="w-3 h-3 ml-1 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 7.09l6.572-.955L10 0l2.939 6.135 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                                </div>
+                                ` : ''}
+                            </div>
+                            <p class="text-sm text-gray-600">${item.desc}</p>
+                            <p class="text-base font-bold text-gray-800 mt-1">₹${item.price.toFixed(2)}</p>
+                        </div>
+                        <button class="favorite-btn text-2xl p-2 rounded-full ${isFavorited ? 'text-brand-red' : 'text-gray-400 hover:bg-red-50'}" 
+                                data-dish-name="${item.name}"
+                                data-dish-image="${item.image}"
+                                data-restaurant-name="${restaurant.name}"
+                                data-price="${item.price}">
+                            <svg class="w-6 h-6" fill="${isFavorited ? '#E23744' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                        </button>
+                    </div>
+                    `;
+                });
+            }
+            function renderFavoritesPage() {
+                const favoritesGrid = document.getElementById('favorites-grid');
+                const emptyFavorites = document.getElementById('empty-favorites');
+                const favoritesCountHeader = document.getElementById('favorites-count-header');
+                favoritesGrid.innerHTML = '';
+                if (favorites.length === 0) {
+                    emptyFavorites.classList.remove('hidden');
+                    favoritesGrid.classList.add('hidden');
+                    favoritesCountHeader.textContent = '0 items';
+                } else {
+                    emptyFavorites.classList.add('hidden');
+                    favoritesGrid.classList.remove('hidden');
+                    favoritesCountHeader.textContent = `${favorites.length} ${favorites.length === 1 ? 'item' : 'items'}`;
+                    favorites.forEach(fav => {
+                        favoritesGrid.innerHTML += `
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col">
+                                <img class="h-40 w-full object-cover" src="${fav.image}" alt="${fav.name}">
+                                <div class="p-4 space-y-2 flex-grow flex flex-col">
+                                    <h3 class="text-lg font-semibold text-gray-900">${fav.name}</h3>
+                                    <p class="text-sm text-gray-600">${fav.restaurantName}</p>
+                                    <p class="text-base font-bold text-gray-800">₹${fav.price.toFixed(2)}</p>
+                                    <div class="flex-grow"></div>
+                                    <button class="remove-favorite-btn w-full bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 mt-2"
+                                        data-dish-name="${fav.name}"
+                                        data-restaurant-name="${fav.restaurantName}">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+            function toggleFavorite(name, restaurantName, image, price) {
+                const index = favorites.findIndex(fav => fav.name === name && fav.restaurantName === restaurantName);
+                let added = false;
+                if (index > -1) { favorites.splice(index, 1); }
+                else { favorites.push({ name, restaurantName, image, price: parseFloat(price) }); added = true; }
+                saveFavorites();
+                updateFavoriteCount();
+                return added;
+            }
+            function loadFavorites() {
+                const storedFavorites = localStorage.getItem(FAVORITES_KEY);
+                if (storedFavorites) { favorites = JSON.parse(storedFavorites); }
+                updateFavoriteCount();
+            }
+            function saveFavorites() { localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites)); }
+            function updateFavoriteCount() {
+                const count = favorites.length;
+                document.getElementById('favorites-badge-desktop').textContent = count;
+                document.getElementById('favorites-badge-mobile').textContent = count;
+                document.getElementById('favorites-badge-desktop').style.display = count > 0 ? 'flex' : 'none';
+                document.getElementById('favorites-badge-mobile').style.display = count > 0 ? 'flex' : 'none';
+            }
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.remove('opacity-0', 'translate-y-5');
+                setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-5'); }, 2000);
+            }
+            function handleSearch(e) {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (query) {
+                    showResultsPage(query);
+                    searchInput.blur();
+                    searchRecommendations.classList.add('hidden');
+                }
+            }
+            function renderSearchRecommendations() {
+                const query = searchInput.value.toLowerCase().trim();
+                if (query.length < 2) {
+                    searchRecommendations.classList.add('hidden');
+                    return;
+                }
+                let recommendationsHTML = '';
+                const matchedRestaurants = allRestaurantNames.filter(name => name.toLowerCase().includes(query));
+                const matchedDishes = allDishNames.filter(name => name.toLowerCase().includes(query));
+                const matchedCuisines = allCuisines.filter(name => name.toLowerCase().includes(query));
+                const matchedLocations = allLocations.filter(name => name.toLowerCase().includes(query));
+                const createSection = (title, items) => {
+                    if (items.length === 0) return '';
+                    let html = `<div class="p-2"><strong class="text-xs text-gray-500 uppercase px-2">${title}</strong>`;
+                    items.slice(0, 3).forEach(item => {
+                        html += `<div class="recommendation-item p-2 rounded-md hover:bg-gray-100 cursor-pointer">${item}</div>`;
+                    });
+                    html += `</div>`;
+                    return html;
+                };
+                recommendationsHTML += createSection('Restaurants', matchedRestaurants);
+                recommendationsHTML += createSection('Dishes', matchedDishes);
+                recommendationsHTML += createSection('Cuisines', matchedCuisines);
+                recommendationsHTML += createSection('Places', matchedLocations);
+                if (recommendationsHTML) {
+                    searchRecommendations.innerHTML = recommendationsHTML;
+                    searchRecommendations.classList.remove('hidden');
+                } else {
+                    searchRecommendations.classList.add('hidden');
+                }
+            }
+
+            function setupEventListeners() {
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => { e.preventDefault(); navigateTo(link.dataset.page); });
+                });
+                document.getElementById('logo-btn').addEventListener('click', showSearchPage);
+                searchForm.addEventListener('submit', handleSearch);
+                searchInput.addEventListener('input', renderSearchRecommendations);
+                searchInput.addEventListener('focus', renderSearchRecommendations);
+                document.addEventListener('click', (e) => {
+                    if (!searchInput.contains(e.target) && !searchRecommendations.contains(e.target)) {
+                        searchRecommendations.classList.add('hidden');
+                    }
+                });
+                searchRecommendations.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('recommendation-item')) {
+                        const query = e.target.textContent;
+                        searchInput.value = query;
+                        searchRecommendations.classList.add('hidden');
+                        showResultsPage(query);
+                    }
+                });
+                document.getElementById('quick-search-chips').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('quick-search-btn')) {
+                        const query = e.target.textContent;
+                        searchInput.value = query;
+                        showResultsPage(query);
+                    }
+                });
+                document.getElementById('results-grid').addEventListener('click', (e) => {
+                    const btn = e.target.closest('.view-menu-btn');
+                    if (btn) { showMenuPage(btn.dataset.restaurantId); }
+                });
+                document.getElementById('menu-items-container').addEventListener('click', (e) => {
+                    const btn = e.target.closest('.favorite-btn');
+                    if (btn) {
+                        const { dishName, restaurantName, dishImage, price } = btn.dataset;
+                        const added = toggleFavorite(dishName, restaurantName, dishImage, price);
+                        const svg = btn.querySelector('svg');
+                        if (added) {
+                            btn.classList.add('text-brand-red');
+                            btn.classList.remove('text-gray-400');
+                            svg.setAttribute('fill', '#E23744');
+                            showToast('Added to favorites!');
+                        } else {
+                            btn.classList.remove('text-brand-red');
+                            btn.classList.add('text-gray-400');
+                            svg.setAttribute('fill', 'none');
+                            showToast('Removed from favorites.');
+                        }
+                    }
+                });
+                document.getElementById('favorites-grid').addEventListener('click', (e) => {
+                    const btn = e.target.closest('.remove-favorite-btn');
+                    if (btn) {
+                        const { dishName, restaurantName } = btn.dataset;
+                        toggleFavorite(dishName, restaurantName);
+                        renderFavoritesPage();
+                        showToast('Removed from favorites.');
+                    }
+                });
+                document.getElementById('retry-search-btn').addEventListener('click', showSearchPage);
+                document.getElementById('find-restaurants-btn').addEventListener('click', showSearchPage);
+            }
+
+            loadFavorites();
+            setupEventListeners();
+            navigateTo('searchPage');
+        });
+    </script>
+</body>
+</html>
